@@ -3,3 +3,5 @@ __pycache__/
 .env
 *.log
 .DS_Store
+.github_token
+.self_learning_lock
