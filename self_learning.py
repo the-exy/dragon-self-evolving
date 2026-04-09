@@ -47,15 +47,21 @@ def release_lock():
         os.remove(LOCK_FILE)
 
 
+def run_git(cmd, **kwargs):
+    kw = {'cwd': REPO_DIR, 'capture_output': True, 'timeout': 60}
+    kw.update(kwargs)
+    result = subprocess.run(cmd, **kw)
+    return result
+
 def git_push():
-    subprocess.run(['git', 'config', 'user.name', 'the-exy'], cwd=REPO_DIR, check=True)
-    subprocess.run(['git', 'config', 'user.email', 'the-exy@github.com'], cwd=REPO_DIR, check=True)
-    subprocess.run(['git', 'add', '.'], cwd=REPO_DIR, check=True)
-    result = subprocess.run(['git', 'commit', '-m', '🤖 自动学习更新'], cwd=REPO_DIR, capture_output=True, text=True)
-    if 'nothing to commit' in result.stdout:
+    run_git(['git', 'config', 'user.name', 'the-exy'])
+    run_git(['git', 'config', 'user.email', 'the-exy@github.com'])
+    run_git(['git', 'add', '.'])
+    result = run_git(['git', 'commit', '-m', '🤖 自动学习更新'])
+    if result.returncode != 0 or (result.stdout and 'nothing to commit' in result.stdout.decode('utf-8', errors='replace')):
         log('没有新内容，跳过提交')
         return
-    subprocess.run(['git', 'push'], cwd=REPO_DIR, capture_output=True, text=True, timeout=60)
+    run_git(['git', 'push'])
     log('推送成功！')
 
 
